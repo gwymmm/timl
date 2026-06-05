@@ -1,5 +1,7 @@
 with Timelines.Test;
 with Ada.Calendar.Arithmetic;
+with Ada.Text_IO;
+with Ada.Strings.Fixed;
 
 package body Timelines is
 
@@ -39,6 +41,7 @@ package body Timelines is
 
       Current_Date := Ada.Calendar.Arithmetic."+"(Current_Date, 1);
       Current_Index := Current_Index + 1;
+
     end loop;
 
   end Init_Timeline_Container;
@@ -70,6 +73,87 @@ package body Timelines is
 
   end Add_Event_Column;
 
+
+  procedure Set_Event(TC: in out Timeline_Container; Event_Column: in Ada.Strings.Unbounded.Unbounded_String;
+      Event_Name: in Ada.Strings.Unbounded.Unbounded_String; Event_Date: in Ada.Calendar.Time) is
+
+    Row_Index: constant Positive := Date_Maps.Element(TC.Date_To_Time_Axis_Index_Map, Event_Date);
+    Column_Index: constant Positive := Col_Name_Maps.Element(TC.Col_Name_To_Col_Index_Map, Event_Column);
+
+--    Col_Pointer: Event_Columns.Reference_Type := Event_Columns.Reference(TC.Columns, Column_Index);
+
+  begin
+
+    TC.Columns(Column_Index)(Row_Index) := Event_Name;
+--    Col_Pointer(Row_Index) := Event_Name;
+
+  end Set_Event;
+
+
+  function Get_Event(TC: in Timeline_Container; Event_Column: in Ada.Strings.Unbounded.Unbounded_String;
+      Event_Date: in Ada.Calendar.Time) return Ada.Strings.Unbounded.Unbounded_String is
+
+    Row_Index: constant Positive := Date_Maps.Element(TC.Date_To_Time_Axis_Index_Map, Event_Date);
+    Column_Index: constant Positive := Col_Name_Maps.Element(TC.Col_Name_To_Col_Index_Map, Event_Column);
+
+  begin
+
+    return TC.Columns(Column_Index)(Row_Index);
+
+  end Get_Event;
+
+  procedure Print_Timeline(TC: in Timeline_Container) is
+
+    use Ada.Strings.Fixed;
+    Field_Separator: constant String := 2 * ' ';
+
+    package Positive_IO is new Ada.Text_IO.Integer_IO(Positive);
+
+    Index_Field_Width: constant Ada.Text_IO.Field := 4;
+
+    First_Row_Index: constant Positive := Time_Axes.First_Index(TC.Time_Axis);
+    Last_Row_Index: constant Positive := Time_Axes.Last_Index(TC.Time_Axis);
+
+    First_Column_Index: constant Positive := Col_Names_Vectors.First_Index(TC.Col_Names);
+    Last_Column_Index: constant Positive := Col_Names_Vectors.Last_Index(TC.Col_Names);
+
+    Column_Width_Array: array (First_Column_Index .. Last_Column_Index) of Positive := (others => 1);
+
+
+    function Get_Max_Entry_Length(Column_Idx: in Positive) return Positive is
+
+      use Ada.Strings.Unbounded;
+      Current_Max: Positive := Length(TC.Col_Names(Column_Idx));
+
+    begin
+
+      return Current_Max;
+
+    end Get_Max_Entry_Length;
+
+
+  begin
+
+    for Column_Idx in First_Column_Index .. Last_Column_Index loop
+
+      Column_Width_Array(Column_Idx) := Get_Max_Entry_Length(Column_Idx);
+
+    end loop;
+
+
+    for Row_Idx in First_Row_Index .. Last_Row_Index loop
+
+      Positive_IO.Put(Row_Idx, Width => Index_Field_Width);
+      Ada.Text_IO.Put(Field_Separator);
+
+      for Column_Idx in First_Column_Index .. Last_Column_Index loop
+
+        null;
+
+      end loop;
+    end loop;
+
+  end Print_Timeline;
 
 --  procedure Init_Lexer(Lexer: out Lexer_Type; Input_File_Name: in String) is
 

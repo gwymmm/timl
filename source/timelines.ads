@@ -11,13 +11,19 @@ package Timelines is
 
   procedure Read_And_Print_Timeline(Input_File_Name: in String);
 
+  procedure Print_Timeline(TC: in Timeline_Container);
+
   procedure Init_Timeline_Container(TC: out Timeline_Container; Year_Of_Interest: in Ada.Calendar.Year_Number);
 
   procedure Add_Event_Column(TC: in out Timeline_Container; New_Col_Name: in Ada.Strings.Unbounded.Unbounded_String);
 
   function Has_Event_Column(TC: in Timeline_Container; Col_Name: in Ada.Strings.Unbounded.Unbounded_String) return Boolean;
 
---add event
+  procedure Set_Event(TC: in out Timeline_Container; Event_Column: in Ada.Strings.Unbounded.Unbounded_String;
+      Event_Name: in Ada.Strings.Unbounded.Unbounded_String; Event_Date: in Ada.Calendar.Time);
+
+  function Get_Event(TC: in Timeline_Container; Event_Column: in Ada.Strings.Unbounded.Unbounded_String;
+      Event_Date: in Ada.Calendar.Time) return Ada.Strings.Unbounded.Unbounded_String;
 
 private
 
