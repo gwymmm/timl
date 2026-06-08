@@ -9,7 +9,7 @@ procedure Timl is
 
 begin
 
-  IO.Put_Line("Line of text");
+  IO.Put_Line("Start of test");
 
   if CMD.Argument_Count = 1 then
     IO.Put_Line("This is the first argument:" & CMD.Argument(1));
