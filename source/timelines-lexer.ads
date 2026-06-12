@@ -25,7 +25,9 @@ private package Timelines.Lexer is
 
   function Get_Category(T: Token_Type) return Token_Category;
 
-  function Get_Value(T: Token_Type) return String;
+  function Get_Value_As_String(T: Token_Type) return String;
+
+  function Get_Value(T: Token_Type) return Ada.Strings.Unbounded.Unbounded_String; 
 
 private
 

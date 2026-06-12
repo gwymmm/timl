@@ -38,11 +38,13 @@ private
 
   function "=" (Left, Right : in Ada.Calendar.Time) return Boolean;
 
+  function "<" (Left, Right : in Ada.Calendar.Time) return Boolean;
+
   package Time_Axes is new Ada.Containers.Vectors(Index_Type => Positive,
     Element_Type => Ada.Calendar.Time, "=" => Ada.Calendar."=");
 
   package Date_Maps is new Ada.Containers.Ordered_Maps(Key_Type => Ada.Calendar.Time,
-    Element_Type => Positive, "<" => Ada.Calendar."<", "=" => "=");
+    Element_Type => Positive, "<" => Timelines."<", "=" => "=");
 
   package Col_Name_Maps is new Ada.Containers.Ordered_Maps(Key_Type => Ada.Strings.Unbounded.Unbounded_String,
     Element_Type => Positive, "<" => Ada.Strings.Unbounded."<", "=" => "=");

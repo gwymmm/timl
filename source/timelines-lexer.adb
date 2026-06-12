@@ -34,8 +34,11 @@ package body Timelines.Lexer is
   function Get_Category(T: Token_Type) return Token_Category is
     ( T.Category );
 
-  function Get_Value(T: Token_Type) return String is
+  function Get_Value_As_String(T: Token_Type) return String is
     ( Ada.Strings.Unbounded.To_String(T.Value) );
+
+  function Get_Value(T: Token_Type) return Ada.Strings.Unbounded.Unbounded_String is
+    ( T.Value );
 
 
 -- main lexer function

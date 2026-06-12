@@ -16,6 +16,39 @@ package body Timelines is
   end "=";
 
 
+  function "<" (Left, Right : in Ada.Calendar.Time) return Boolean is
+    use Ada.Calendar;
+  begin
+
+    if Year(Left) < Year(Right) then
+      return True;
+    end if;
+
+    if Year(Left) > Year(Right) then
+      return False;
+    end if;
+
+    if Month(Left) < Month(Right) then
+      return True;
+    end if;
+
+    if Month(Left) > Month(Right) then
+      return False;
+    end if;
+
+    if Day(Left) < Day(Right) then
+      return True;
+    end if;
+
+    if Day(Left) > Day (Right) then
+      return False;
+    end if;
+
+    return False;
+
+  end "<";
+
+
   procedure Read_And_Print_Timeline(Input_File_Name: in String) is
 
   begin
@@ -113,6 +146,7 @@ package body Timelines is
     return TC.Columns(Column_Index)(Row_Index);
 
   end Get_Event;
+
 
   procedure Print_Timeline(TC: in Timeline_Container) is
 
@@ -250,7 +284,7 @@ package body Timelines is
       Positive_IO.Put(Row_Idx, Width => Index_Field_Width);
       Ada.Text_IO.Put(Field_Separator);
 
-      Ada.Text_IO.Put( Ada.Calendar.Formatting.Image(TC.Time_Axis(Row_Idx), True) );
+      Ada.Text_IO.Put( Ada.Calendar.Formatting.Image(TC.Time_Axis(Row_Idx)) );
       Ada.Text_IO.Put(Field_Separator);
 
       Ada.Text_IO.Put( Pad( To_Month_Name( Ada.Calendar.Month(TC.Time_Axis(Row_Idx)) ), Month_Field_Width) );
