@@ -9,6 +9,9 @@ package body Timelines is
 
   --procedure Read(T: out Time_Line_Record, Input_File_Name: in String);
 
+  Empty_Event: constant Ada.Strings.Unbounded.Unbounded_String :=
+    Ada.Strings.Unbounded.To_Unbounded_String(" ");
+
   function "=" (Left, Right : in Ada.Calendar.Time) return Boolean is
     use Ada.Calendar;
   begin
@@ -102,9 +105,6 @@ package body Timelines is
 
     Time_Line_Length: constant Ada.Containers.Count_Type := Time_Axes.Length(TC.Time_Axis);
 
-    Empty_Event: constant Ada.Strings.Unbounded.Unbounded_String :=
-      Ada.Strings.Unbounded.To_Unbounded_String(" ");
-
     Empty_Event_Column: constant Events.Vector :=
       Events.To_Vector(New_Item => Empty_Event, Length => Time_Line_Length);
 
@@ -117,6 +117,20 @@ package body Timelines is
     Event_Columns.Append(TC.Columns, Empty_Event_Column);
 
   end Add_Event_Column;
+
+
+  function Is_Empty_Event_Slot(TC: in out Timeline_Container; Event_Column: in Ada.Strings.Unbounded.Unbounded_String;
+      Event_Date: in Ada.Calendar.Time) return Boolean is
+
+    Row_Index: constant Positive := Date_Maps.Element(TC.Date_To_Time_Axis_Index_Map, Event_Date);
+    Column_Index: constant Positive := Col_Name_Maps.Element(TC.Col_Name_To_Col_Index_Map, Event_Column);
+    use Ada.Strings.Unbounded;
+
+  begin
+
+    return TC.Columns(Column_Index)(Row_Index) = Empty_Event;
+
+  end Is_Empty_Event_Slot;
 
 
   procedure Set_Event(TC: in out Timeline_Container; Event_Column: in Ada.Strings.Unbounded.Unbounded_String;
