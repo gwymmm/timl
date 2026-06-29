@@ -19,8 +19,10 @@ package Timelines is
 
   function Has_Event_Column(TC: in Timeline_Container; Col_Name: in Ada.Strings.Unbounded.Unbounded_String) return Boolean;
 
-  function Is_Empty_Event_Slot(TC: in out Timeline_Container; Event_Column: in Ada.Strings.Unbounded.Unbounded_String;
+  function Is_Empty_Event_Slot(TC: in Timeline_Container; Event_Column: in Ada.Strings.Unbounded.Unbounded_String;
       Event_Date: in Ada.Calendar.Time) return Boolean;
+
+  function Date_Is_Covered_By_Timeline(TC: in Timeline_Container; Event_Date: in Ada.Calendar.Time) return Boolean;
 
   procedure Set_Event(TC: in out Timeline_Container; Event_Column: in Ada.Strings.Unbounded.Unbounded_String;
       Event_Name: in Ada.Strings.Unbounded.Unbounded_String; Event_Date: in Ada.Calendar.Time);

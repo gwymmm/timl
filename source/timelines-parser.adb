@@ -22,6 +22,54 @@ package body Timelines.Parser is
     Current_Event_Name: Ada.Strings.Unbounded.Unbounded_String;
 
 
+    procedure Continue_Reading is
+    begin
+
+      Lexer.Next_Token(Lexer_Instance, Current_Token);
+
+      if Lexer.Get_Category(Current_Token) = Lexer.Column then
+
+        Current_Event_Column := Lexer.Get_Value(Current_Token);
+
+        if not Has_Event_Column(TC, Current_Event_Column) then
+          Add_Event_Column(TC, Current_Event_Column);
+        end if;
+
+      Read_Event_Entry;
+
+      elsif Lexer.Get_Category(Current_Token) = Lexer.Date then
+
+        declare
+        begin
+
+          Current_First_Date := Ada.Calendar.Formatting.Value(Lexer.Get_Value_As_String(Current_Token) & " 00:00:00",
+                  Ada.Calendar.Time_Zones.UTC_Time_Offset);
+
+        exception
+        when Event: Constraint_Error =>
+          Ada.Text_IO.Put_Line("Line " & Lexer.Get_Line(Current_Token)'Image &
+                                  ": Error: Reading of date failed (expected format YYYY-MM-DD); Details: "
+                                  & Ada.Exceptions.Exception_Name(Event) & ", " & Ada.Exceptions.Exception_Message(Event) );
+          return;
+        end;
+
+        Read_Event_Entry_Continued;
+
+      elsif Lexer.Get_Category(Current_Token) = Lexer.Error then
+
+        Ada.Text_IO.Put_Line("Line " & Lexer.Get_Line(Current_Token)'Image &
+                                ": Error encountered: " & Lexer.Get_Value_As_String(Current_Token) );
+
+      else
+
+        Ada.Text_IO.Put_Line("Line " & Lexer.Get_Line(Current_Token)'Image &
+                                "Definition of column or event expected");
+
+      end if;
+
+    end Continue_Reading;
+
+
     procedure Read_Event_Entry_Continued is
     begin
 
@@ -29,11 +77,16 @@ package body Timelines.Parser is
 
       if Lexer.Get_Category(Current_Token) = Lexer.Event or Lexer.Get_Category(Current_Token) = Lexer.Last_Event then
 
---... if date is covered by timeline
+        if not Date_Is_Covered_By_Timeline(TC, Current_First_Date) then
+          Ada.Text_IO.Put_Line("Line " & Lexer.Get_Line(Current_Token)'Image &
+                                  ": Error: Date not covered by timeline.");
+          return;
+        end if;
 
         if not Is_Empty_Event_Slot(TC, Current_Event_Column, Current_First_Date) then
           Ada.Text_IO.Put_Line("Line " & Lexer.Get_Line(Current_Token)'Image &
-                                  ": Warning: Entry already present for defined column and date. Value will be overwritten.");
+                                  ": Error: Entry already present for defined column and date.");
+          return;
         end if;
 
         Current_Event_Name := Lexer.Get_Value(Current_Token);
@@ -49,6 +102,7 @@ package body Timelines.Parser is
 
         Lexer.Next_Token(Lexer_Instance, Current_Token);
 
+        -- read date interval case --
         if Lexer.Get_Category(Current_Token) = Lexer.Date then
 
           declare
@@ -73,7 +127,8 @@ package body Timelines.Parser is
 
             if Timelines."<"(Current_Second_Date, Current_First_Date) then
               Ada.Text_IO.Put_Line("Line " & Lexer.Get_Line(Current_Token)'Image &
-                                      ": Warning: Date interval is empty (right date < left date). No event entry will be set.");
+                                      ": Error: Date interval is empty (right date < left date).");
+              return;
             end if;
 
             declare
@@ -83,14 +138,20 @@ package body Timelines.Parser is
 
               while Timelines."<"(Current_Date, Last_Date_Plus_One) loop
 
---...
+                if not Date_Is_Covered_By_Timeline(TC, Current_Date) then
+                  Ada.Text_IO.Put_Line("Line " & Lexer.Get_Line(Current_Token)'Image &
+                                          ": Error: Date not covered by timeline.");
+                  return;
+                end if;
 
                 if not Is_Empty_Event_Slot(TC, Current_Event_Column, Current_Date) then
                   Ada.Text_IO.Put_Line("Line " & Lexer.Get_Line(Current_Token)'Image &
-                                          ": Warning: Entry already present for defined column and date. Value will be overwritten.");
+                                          ": Error: Entry already present for defined column and date.");
+                  return;
                 end if;
 
                 Set_Event(TC, Current_Event_Column, Current_Event_Name, Current_Date);
+                Ada.Calendar.Arithmetic."+"(Current_Date, 1);
 
               end loop;
 
@@ -122,9 +183,10 @@ package body Timelines.Parser is
         else
 
           Ada.Text_IO.Put_Line("Line " & Lexer.Get_Line(Current_Token)'Image &
-                                  ": Error: End date of date interval expected");
+                                  ": Error: End date in date interval expected");
 
         end if;
+        -- end of read date interval case --
 
       elsif Lexer.Get_Category(Current_Token) = Lexer.Error then
 

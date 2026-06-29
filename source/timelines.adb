@@ -101,6 +101,12 @@ package body Timelines is
   end Has_Event_Column;
 
 
+  function Date_Is_Covered_By_Timeline(TC: in Timeline_Container; Event_Date: in Ada.Calendar.Time) return Boolean is
+  begin
+    return Date_Maps.Contains(TC.Date_To_Time_Axis_Index_Map, Key => Event_Date);
+  end Date_Is_Covered_By_Timeline;
+
+
   procedure Add_Event_Column(TC: in out Timeline_Container; New_Col_Name: in Ada.Strings.Unbounded.Unbounded_String) is
 
     Time_Line_Length: constant Ada.Containers.Count_Type := Time_Axes.Length(TC.Time_Axis);
@@ -119,7 +125,7 @@ package body Timelines is
   end Add_Event_Column;
 
 
-  function Is_Empty_Event_Slot(TC: in out Timeline_Container; Event_Column: in Ada.Strings.Unbounded.Unbounded_String;
+  function Is_Empty_Event_Slot(TC: in Timeline_Container; Event_Column: in Ada.Strings.Unbounded.Unbounded_String;
       Event_Date: in Ada.Calendar.Time) return Boolean is
 
     Row_Index: constant Positive := Date_Maps.Element(TC.Date_To_Time_Axis_Index_Map, Event_Date);
